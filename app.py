@@ -5,8 +5,9 @@ from aiogram.types import ContentType as ct
 
 from apps.admin import *
 from apps.user import user_main_menu, user_product, user_categories_f, product_buy_menu, \
-    product_count, user_change_about, user_change_about_, product_buy, change_data_personal, change_data_personal_, \
-    change_data_personal_acces
+    product_count, user_change_about, user_change_about_, product_buy, change_data_personal, \
+    change_data_personal_address, change_data_personal_fi, change_data_personal_telefon, change_data_personal_aloqa, \
+    change_data_personal_viloyat, change_data_personal_tuman, change_data_personal_buy
 from loader import dp
 # from states import *
 from apps.login import \
@@ -65,7 +66,13 @@ dp.register_message_handler(user_change_about_, content_types=[ct.TEXT], state=U
 
 # data
 dp.register_message_handler(change_data_personal, content_types=[ct.TEXT], state=User_state.change_data_personal)
-dp.register_message_handler(change_data_personal_, content_types=[ct.TEXT], state=User_state.change_data_personal_)
-dp.register_message_handler(change_data_personal_acces, content_types=[ct.TEXT],
-                            state=User_state.change_data_personal_acces)
+dp.register_message_handler(change_data_personal_address, content_types=[ct.TEXT],
+                            state=User_state.change_data_personal_address)
 
+# add data
+dp.register_message_handler(change_data_personal_buy, content_types=[ct.TEXT], state=User_state.change_data_personal_buy)
+dp.register_message_handler(change_data_personal_fi, content_types=[ct.TEXT], state=User_state.change_data_personal_fi)
+dp.register_message_handler(change_data_personal_telefon, content_types=[ct.TEXT], state=User_state.change_data_personal_telefon)
+dp.register_message_handler(change_data_personal_aloqa, content_types=[ct.TEXT], state=User_state.change_data_personal_aloqa)
+dp.register_message_handler(change_data_personal_viloyat, content_types=[ct.TEXT], state=User_state.change_data_personal_viloyat)
+dp.register_message_handler(change_data_personal_tuman, content_types=[ct.TEXT], state=User_state.change_data_personal_tuman)

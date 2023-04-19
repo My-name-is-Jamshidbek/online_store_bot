@@ -7,7 +7,8 @@ from aiogram.dispatcher import FSMContext as s
 from buttons.inlinekeyboardbuttons import inlinekeyboardbutton
 from buttons.keyboardbuttons import keyboardbutton
 from config import menus
-from database.database import is_admin, is_supadmin, create_database, add_admin, add_category, get_user_by_tg_id, \
+from database.database import is_admin, is_supadmin, create_database, add_admin, add_category, get_user_by_tg_ids as \
+    get_user_by_tg_id, \
     add_new_user
 # from database.database import *
 from states import *
@@ -19,7 +20,7 @@ async def cmd_start(m: m):
     :return:
     """
 
-    create_database()
+    # create_database()
     # add_admin(ism="Jam1", familiya='O1', telefon="+9981", aloqa='t.me/mal_un', tg_id='2081653869')
     # add_category('cat1')
     # add_category('cat2')

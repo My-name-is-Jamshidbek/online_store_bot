@@ -39,6 +39,8 @@ def create_database():
                       phone_number TEXT,
                       viloyat TEXT NOT NULL,
                       address TEXT,
+                      aloqa TEXT,
+                      tuman TEXT,
                       Tg_id TEXT NOT NULL)''')
     conn.execute('''CREATE TABLE IF NOT EXISTS products 
                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -260,14 +262,17 @@ def remove_product(product_name: str, category_name: str) -> bool:
         return False
 
 
-def get_user_by_tg_id(tg_id: str) -> (bool, dict):
+def get_user_by_tg_ids(tg_id: str) -> (bool, dict):
     try:
         conn = sqlite3.connect(DATABASE_NAME)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM users WHERE Tg_id = ?", (tg_id,))
-        result = cursor.fetchone()
+        results = cursor.fetchone()
         conn.close()
-        if result:
+        if results:
+            result = results
+        #     rresult = {}
+        #     for result in results:
             user = {
                 "id": result[0],
                 "name": result[1],
@@ -278,13 +283,14 @@ def get_user_by_tg_id(tg_id: str) -> (bool, dict):
                 "address": result[6],
                 "tg_id": result[7]
             }
-            print("Info: database/get_user_by_tg_id -> True")
-            return user
+                # rresult[result[1]] = user
+            print("Info: database/get_user_by_tg_ids -> True")
+            return rresult
         else:
-            print("Info: database/get_user_by_tg_id -> User not found")
+            print("Info: database/get_user_by_tg_ids -> User not found")
             return False
     except Exception as e:
-        print(f"Info: database/get_user_by_tg_id -> {e}")
+        print(f"Info: database/get_user_by_tg_ids -> {e}")
         return False
 
 
@@ -487,22 +493,20 @@ def orders_to_excel(filename):
         for d in orders:
             n += 1
             product_ = get_product_all_data_by_id(d[1])
-            user_ = get_user_by_tg_id(d[3])
-            worksheet.write(n, 0, d[0])
-            worksheet.write(n, 1, d[2])
-            worksheet.write(n, 2, product_[4])
-            worksheet.write(n, 3, product_[0])
-            worksheet.write(n, 4, product_[1])
-            worksheet.write(n, 5, product_[2])
-            # dict_["Ummumiy narh"].append(str(float(float(d[2])*float(product_[2]))))
-            worksheet.write(n, 7, user_["id"])
-            worksheet.write(n, 8, user_["name"])
-            worksheet.write(n, 9, user_["phone_number"])
-            worksheet.write(n, 10, user_["aloqa"])
-            worksheet.write(n, 11, user_["viloyat"])
-            worksheet.write(n, 12, user_["tuman"])
-            worksheet.write(n, 13, user_["address"])
-            worksheet.write(n, 14, user_["tg_id"])
+            user_ = get_user_by_tg_ids(d[4])
+            print(d)
+            print(product_)
+            print(user_)
+            # sana
+            worksheet.write(n, 1, d[0])
+            worksheet.write(n, 2, product_[0])
+            worksheet.write(n, 3, d[2])
+            worksheet.write(n, 4, f"{float(float(d[2]*float(product_[2])))}")
+            # worksheet.write(n, 5, user_[""])                                viloyat
+            # worksheet.write(n, 4, product_[1])                                  addres
+            # worksheet.write(n, 5, product_[2])                                   buyurtmach
+            # dict_["Ummumiy narh"].append(str(float(float(d[2])*float(product_[2]))))  nomeri
+            worksheet.write(n, 9, d[3])
 
         worksheet.set_column('A:N', 50)
         # worksheet.set_column('B:B', 20) son bn manzil
