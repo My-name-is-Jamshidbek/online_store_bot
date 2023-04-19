@@ -273,6 +273,9 @@ def get_user_by_tg_ids(tg_id: str) -> (bool, dict):
             result = results
         #     rresult = {}
         #     for result in results:
+            a = 90
+            b = 0
+            c = a/b
             user = {
                 "id": result[0],
                 "name": result[1],
