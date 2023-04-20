@@ -1,5 +1,5 @@
 """
-data base change cament product uchun, soni 1+1 uchun, ro'yxardan o'tish, excl fayl
+data base 
 """
 import datetime
 # import pandas as pd
@@ -10,7 +10,7 @@ import xlsxwriter as xlsxwriter
 # import xlsxwriter
 
 from config import DATABASE_NAME
-import pandas as pd
+from datetime import datetime
 
 # create database
 def create_database():
@@ -55,7 +55,9 @@ def create_database():
                   product INTEGER NOT NULL,
                   number_of_orders TEXT,
                   cament TEXT,
-                  user_tg_id INTEGER NOT NULL)''')
+                  deta TEXT,
+                  user_tg_id INTEGER NOT NULL,
+                  user_id INTEGER NOT NULL)''')
     conn.execute('''CREATE TABLE IF NOT EXISTS categories 
                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
                   name TEXT NOT NULL)''')
@@ -267,15 +269,13 @@ def get_user_by_tg_ids(tg_id: str) -> (bool, dict):
         conn = sqlite3.connect(DATABASE_NAME)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM users WHERE Tg_id = ?", (tg_id,))
-        results = cursor.fetchone()
+        results = cursor.fetchall()
+        results = results[-1]
         conn.close()
         if results:
             result = results
         #     rresult = {}
         #     for result in results:
-            a = 90
-            b = 0
-            c = a/b
             user = {
                 "id": result[0],
                 "name": result[1],
@@ -288,12 +288,45 @@ def get_user_by_tg_ids(tg_id: str) -> (bool, dict):
             }
                 # rresult[result[1]] = user
             print("Info: database/get_user_by_tg_ids -> True")
-            return rresult
+            return user
         else:
             print("Info: database/get_user_by_tg_ids -> User not found")
             return False
     except Exception as e:
         print(f"Info: database/get_user_by_tg_ids -> {e}")
+        return False
+
+
+def get_user_by_id_ids(_id: str) -> (bool, dict):
+    try:
+        conn = sqlite3.connect(DATABASE_NAME)
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE id = ?", (_id,))
+        results = cursor.fetchone()
+        # results = results[-1]
+        conn.close()
+        if results:
+            result = results
+        #     rresult = {}
+        #     for result in results:
+            user = {
+                "id": result[0],
+                "name": result[1],
+                "phone_number": result[2],
+                "aloqa": result[3],
+                "viloyat": result[4],
+                "tuman": result[5],
+                "address": result[6],
+                "tg_id": result[7]
+            }
+                # rresult[result[1]] = user
+            print("Info: database/get_user_by_id_ids -> True")
+            return user
+        else:
+            print("Info: database/get_user_by_id_ids -> User not found")
+            return False
+    except Exception as e:
+        print(f"Info: database/get_user_by_id_ids -> {e}")
         return False
 
 
@@ -338,11 +371,12 @@ def get_product_all_data_by_id(id_: int) -> (list, bool):
         return False
 
 
-def add_order(product: str, number_of_orders: int, user_tg_id: str, cament: str,) -> bool:
+def add_order(product: str, number_of_orders: int, user_id: str, user_tg_id: str, cament: str,) -> bool:
     """
     Adds a new order to the database.
 
     :param cament: cament order
+    :param user_id: is user id
     :param product: ID of the product being ordered
     :param number_of_orders: number of products being ordered
     :param user_tg_id: ID of the user placing the order
@@ -350,8 +384,12 @@ def add_order(product: str, number_of_orders: int, user_tg_id: str, cament: str,
     """
     try:
         conn = sqlite3.connect(DATABASE_NAME)
-        conn.execute("INSERT INTO orders (product, number_of_orders, user_tg_id, cament) VALUES (?, ?, ?, ?)",
-                     (product, number_of_orders, user_tg_id, cament))
+        conn.execute("INSERT INTO orders (product, number_of_orders, user_id, cament, user_tg_id, deta) VALUES (?, ?, "
+                     "?, "
+                     "?, "
+                     "?, "
+                     "?)",
+                     (product, number_of_orders, user_id, cament, user_tg_id, datetime.now()))
         conn.commit()
         conn.close()
         print(f"Info: database/add_order -> True")
@@ -461,21 +499,16 @@ def get_orders_by_user_tg_id(tg_id: str) -> list:
 def orders_to_excel(filename):
     try:
         headers= [
-        "ID",
-        "Mahsulot idsi",
+        "sana",
+        "Buyurtma idsi",
         "Mahsulot nomi",
-        "Mahsulot haqida batafsil malumot",
-        "Mahsulot narhi",
         "Buyurtmalar soni",
-        # "Ummumiy narh": []
-        "Buyurtmachi idsi",
+        "Buyurtma narhi",
+        "Viloyat",
+        "Manzil",
         "Buyurtmachi ismi",
         "Buyuyrtmachi telefon raqami",
-        "Buyurtmachi aloqa malumoti",
-        "Buyurtmachi viloyati",
-        "Buyurtmachi tumani",
-        "Buyurtmachi manzili",
-        "Buyurtmachi telegram idsi",
+        "Izoh"
         ]
         conn = sqlite3.connect(DATABASE_NAME)
         orders = conn.execute("SELECT * FROM orders").fetchall()
@@ -496,28 +529,22 @@ def orders_to_excel(filename):
         for d in orders:
             n += 1
             product_ = get_product_all_data_by_id(d[1])
-            user_ = get_user_by_tg_ids(d[4])
-            print(d)
-            print(product_)
-            print(user_)
-            # sana
+            user_ = get_user_by_tg_ids(d[5])
+            worksheet.write(n, 0, d[4])
             worksheet.write(n, 1, d[0])
             worksheet.write(n, 2, product_[0])
             worksheet.write(n, 3, d[2])
-            worksheet.write(n, 4, f"{float(float(d[2]*float(product_[2])))}")
-            # worksheet.write(n, 5, user_[""])                                viloyat
-            # worksheet.write(n, 4, product_[1])                                  addres
-            # worksheet.write(n, 5, product_[2])                                   buyurtmach
-            # dict_["Ummumiy narh"].append(str(float(float(d[2])*float(product_[2]))))  nomeri
+            if float(d[2])==float(3): osoni = 2
+            worksheet.write(n, 4, f"{float(osoni*float(product_[2]))}")
+            worksheet.write(n, 5, user_["viloyat"])
+            worksheet.write(n, 6, f"{user_['viloyat']} {user_['tuman']} {user_['address']}")
+            worksheet.write(n, 7, user_["name"])
+            worksheet.write(n, 8, f"{user_['phone_number']} {user_['aloqa']}")
             worksheet.write(n, 9, d[3])
 
-        worksheet.set_column('A:N', 50)
-        # worksheet.set_column('B:B', 20) son bn manzil
-        # worksheet.set_column('C:C', 35)
-        # worksheet.set_column('D:D', 20)
-        # worksheet.set_column('E:E', 50)
-        # worksheet.set_column('F:F', 50)
-        # worksheet.set_column('E:E', 50)
+        worksheet.set_column('A:B', 30)
+        worksheet.set_column('C:G', 20)
+        worksheet.set_column('H:J', 40)
         # worksheet.set_column('E:E', 50)
         # worksheet.set_column('E:E', 50)
 

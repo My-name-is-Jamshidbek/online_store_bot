@@ -245,7 +245,7 @@ async def add_product_about(m: m, state: s):
 async def add_product_photo(m: m, state: s):
     if m.photo:
         photo = m.photo[-1]
-        photo_name = f"photo_{m.from_user.id}_{m.message_id}.jpg"
+        photo_name = f"database/media/photo_{m.from_user.id}_{m.message_id}.jpg"
         await state.update_data(add_product_photo=photo_name)
         await photo.download(photo_name)
         await m.reply("Rahmat! Rasm qabul qilindi.")
@@ -253,7 +253,7 @@ async def add_product_photo(m: m, state: s):
         await Admin_state.add_product_price.set()
     elif m.video:
         video = m.video
-        video_name = f"video_{m.from_user.id}_{video.file_id}.mp4"
+        video_name = f"database/media/video_{m.from_user.id}_{video.file_id}.mp4"
         await state.update_data(add_product_photo=video_name)
         await video.download(video_name)
         await m.reply("Rahmat! Video qabul qilindi.")
