@@ -6,7 +6,7 @@ from aiogram.dispatcher import FSMContext as s, FSMContext
 
 from buttons.inlinekeyboardbuttons import inlinekeyboardbutton
 from buttons.keyboardbuttons import keyboardbutton
-from config import menus
+from config import menus, uzbekistan
 from database.database import categories, products, product, get_user_by_tg_ids as get_user_by_tg_id, add_order, \
     get_product_id, \
     change_user_data, get_orders_by_user_tg_id, get_product_all_data_by_id, add_new_user, get_user_by_id_ids
@@ -128,13 +128,9 @@ async def change_data_personal_aloqa(m: m, state: s):
         await User_state.main_menu.set()
 
     else:
+        btns = list(uzbekistan.keys())+["Bekor qilish"]
         await state.update_data(change_data_personal_aloqa=m.text)
-        await m.answer("Viloyatingizni tanlang:", reply_markup=keyboardbutton(["Toshkent vil","Toshkent sh",
-                                                                               "Namangan","Andijon","Farg'ona",
-                                                                               "Navoiy","Xorazm","Buxoro","Jizzax",
-                                                                               "Qashqadaryo","Qoraqalpog'iston res",
-                                                                               "Samarqand","Sirdaryo","Surxondaryo",
-                                                                               "Bekor qilish"], row=2))
+        await m.answer("Viloyatingizni tanlang:", reply_markup=keyboardbutton(btns, row=2))
         await User_state.change_data_personal_viloyat.set()
 
 async def change_data_personal_viloyat(m: m, state: s):
@@ -148,7 +144,9 @@ async def change_data_personal_viloyat(m: m, state: s):
 
     else:
         await state.update_data(change_data_personal_viloyat=m.text)
-        await m.answer("Tumaningizni kiriting:", reply_markup=keyboardbutton(["Bekor qilish"]))
+        if m.text in list(uzbekistan.keys()):
+            btns = uzbekistan[m.text]+"Bekor qilish"
+            await m.answer("Tumaningizni tanlang:", reply_markup=keyboardbutton(["Bekor qilish"]))
         await User_state.change_data_personal_tuman.set()
 
 async def change_data_personal_tuman(m: m, state: s):
