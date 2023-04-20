@@ -8,7 +8,7 @@ from buttons.inlinekeyboardbuttons import product_forward, inlinekeyboardbutton
 from buttons.keyboardbuttons import keyboardbutton
 from config import menus
 from database.database import categories, products, product, remove_category, add_category, add_product_, \
-    remove_product, orders_to_excel
+    remove_product, orders_to_excel, get_orders_years, get_orders_months
 from states import Admin_state
 
 
@@ -26,10 +26,82 @@ async def admin_main_menu(m: m, state: s):
         )
         await Admin_state.categories.set()
     elif m.text == "Buyurtmalar":
-        filename = f"database/excels/orders.xlsx"
-        orders_to_excel(filename)
+        years = get_orders_years()
+        if False and len(years) == 1:
+            await state.update_data(orders_year=years[0])
+            months = get_orders_months(years=years[0])
+            if False and len(months) == 1:
+                months += ["Orqaga"]
+                filename = f"database/excels/orders.xlsx"
+                orders_to_excel(filename, year=years[0], month=months[0])
+                file = InputFile(filename)
+                await m.answer_document(document=file, caption="Orders")
+            else:
+                await m.answer("Oyni tanlang:", reply_markup=keyboardbutton(get_orders_months(year=years[0])))
+                await Admin_state.orders_month.set()
+        else:
+            years+=["Orqaga"]
+            await m.answer("Yilni tanlang:", reply_markup=keyboardbutton(years))
+            await Admin_state.orders_year.set()
+
+
+async def orders_year(m: m, state: s):
+    years = get_orders_years()
+    if m.text == "Orqaga":
+        await m.answer(
+            "Chiqildi:",
+            reply_markup=keyboardbutton(list(menus['admin'][0].keys()), row=2)
+        )
+        await Admin_state.main_menu.set()
+    elif m.text in years:
+        database = await state.get_data()
+        year = database.get(orders_year)
+        months = get_orders_months(year=m.text)
+        months+=["Orqaga"]
+        if False and len(months) == 1:
+            filename = f"database/excels/{year}_{m.text}_orders.xlsx"
+            orders_to_excel(filename, year=year, month=m.text)
+            file = InputFile(filename)
+            await m.answer_document(document=file, caption="Orders",
+                                    reply_markup=keyboardbutton(list(menus['admin'][0].keys()), row=2)
+                                    )
+            await Admin_state.main_menu.set()
+        else:
+            await state.update_data(orders_year=m.text)
+            await m.answer("Oyni tanlang:", reply_markup=keyboardbutton(months))
+            await Admin_state.orders_month.set()
+
+
+async def orders_month(m: m, state: s):
+    database = await state.get_data()
+    year = database.get("orders_year")
+    months = get_orders_months(year=year)
+    if m.text == "Orqaga":
+        years = get_orders_years()
+        if False and len(years) == 1:
+            await state.update_data(orders_year=years[0])
+            months = get_orders_months(years=years[0])
+            months += ["Orqaga"]
+            if False and len(months) == 1:
+                filename = f"database/excels/orders.xlsx"
+                orders_to_excel(filename, year=years[0], month=months[0])
+                file = InputFile(filename)
+                await m.answer_document(document=file, caption="Orders")
+            else:
+                await m.answer("Oyni tanlang:", reply_markup=keyboardbutton(years))
+                await Admin_state.orders_month.set()
+        else:
+            years += ["Orqaga"]
+            await m.answer("Yilni tanlang:", reply_markup=keyboardbutton(years))
+            await Admin_state.orders_year.set()
+    elif m.text in months:
+        filename = f"database/excels/{year}_{m.text}_orders.xlsx"
+        orders_to_excel(filename, year=year, month=m.text)
         file = InputFile(filename)
-        await m.answer_document(document=file, caption="Orders")
+        await m.answer_document(document=file, caption="Orders",
+        reply_markup = keyboardbutton(list(menus['admin'][0].keys()), row=2)
+        )
+        await Admin_state.main_menu.set()
 
 
 async def admin_categories_f(m:m, state: s):

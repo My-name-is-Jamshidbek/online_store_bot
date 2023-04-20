@@ -128,7 +128,8 @@ async def change_data_personal_aloqa(m: m, state: s):
         await User_state.main_menu.set()
 
     else:
-        btns = list(uzbekistan.keys())+["Bekor qilish"]
+        list(uzbekistan.keys()).sort()
+        btns = list(uzbekistan.keys()) + ["Bekor qilish"]
         await state.update_data(change_data_personal_aloqa=m.text)
         await m.answer("Viloyatingizni tanlang:", reply_markup=keyboardbutton(btns, row=2))
         await User_state.change_data_personal_viloyat.set()
@@ -145,8 +146,8 @@ async def change_data_personal_viloyat(m: m, state: s):
     else:
         await state.update_data(change_data_personal_viloyat=m.text)
         if m.text in list(uzbekistan.keys()):
-            btns = uzbekistan[m.text]+"Bekor qilish"
-            await m.answer("Tumaningizni tanlang:", reply_markup=keyboardbutton(["Bekor qilish"]))
+            btns = uzbekistan[m.text]+["Bekor qilish"]
+            await m.answer("Tumaningizni tanlang:", reply_markup=keyboardbutton(btns))
         await User_state.change_data_personal_tuman.set()
 
 async def change_data_personal_tuman(m: m, state: s):
@@ -197,26 +198,21 @@ async def change_data_personal_address(m: m, state: s):
         #     f"Manzil: {m.text}\n"
         # )
         if add_new_user(
-            user['change_data_personal_fi'],
-            user['change_data_personal_telefon'],
-            user['change_data_personal_aloqa'],
-            user['change_data_personal_viloyat'],
-            user['change_data_personal_tuman'],
-            m.text,
-            m.chat.id,
+            name=user['change_data_personal_fi'],
+            phone_number=user['change_data_personal_telefon'],
+            aloqa=user['change_data_personal_aloqa'],
+            viloyat=user['change_data_personal_viloyat'],
+            tuman=user['change_data_personal_tuman'],
+            address=m.text,
+            tg_id=m.chat.id,
         ):
             await m.answer(f"Malumotlaringizni muvaffaqiyatli saqlandi.")
         else:
             await m.answer(f"Malumotlaringizni muvaffaqiyatli saqlanmadi.")
         user = get_user_by_tg_id(tg_id=m.chat.id)
-        btns = []
-        for i in list(user.keys()): btns.append(i)
-        btns += ["Chiqish", "Qo'shish"]
+        btns = ["Tasdiqlash", "O'zgartirish", "Chiqish"]
         await m.answer(f"Malumotlaringiz:",
                        reply_markup=keyboardbutton(btns, row=2))
-        database = await state.get_data()
-        buying = database.get("buying")
-        await state.update_data(buying="False")
         await m.answer(
             f"F.I: {user['name']}\n"
             f"Telefon: {user['phone_number']}\n"
@@ -225,6 +221,17 @@ async def change_data_personal_address(m: m, state: s):
             f"Tuman: {user['tuman']}\n"
             f"Manzil: {user['address']}\n"
         )
+        database = await state.get_data()
+        buying = database.get("buying")
+        await state.update_data(buying="False")
+        # await m.answer(
+        #     f"F.I: {user['name']}\n"
+        #     f"Telefon: {user['phone_number']}\n"
+        #     f"Aloqa: {user['aloqa']}\n"
+        #     f"Viloyat: {user['viloyat']}\n"
+        #     f"Tuman: {user['tuman']}\n"
+        #     f"Manzil: {user['address']}\n"
+        # )
 
         if buying == "True":
             await User_state.change_data_personal_buy.set()
@@ -350,7 +357,7 @@ async def product_count(m: m, state: s):
 
 
 async def change_data_personal_buy(m: m, state: s):
-    if m.text == "O'zgartirish:":
+    if m.text == "O'zgartirish":
         await m.answer("F.I:", reply_markup=keyboardbutton(["Bekor qilish"], row=2))
         await User_state.change_data_personal_fi.set()
     elif m.text == "Chiqish" or m.text == "Bekor qilish":

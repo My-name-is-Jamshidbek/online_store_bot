@@ -27,6 +27,9 @@ class Admin_state(StatesGroup):
     add_product = State()
     product_menu = State()
 
+    orders_year = State()
+    orders_month = State()
+
 
 class User_state(StatesGroup):
     """

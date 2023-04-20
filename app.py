@@ -43,6 +43,10 @@ dp.register_message_handler(add_product, content_types=[ct.TEXT], state=Admin_st
 ## remove product
 dp.register_message_handler(admin_product_menu, content_types=[ct.TEXT], state=Admin_state.product_menu)
 
+## data
+dp.register_message_handler(orders_year, content_types=[ct.TEXT], state=Admin_state.orders_year)
+dp.register_message_handler(orders_month, content_types=[ct.TEXT], state=Admin_state.orders_month)
+
 """
 USER APPS
 """

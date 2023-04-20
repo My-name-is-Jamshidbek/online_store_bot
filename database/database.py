@@ -280,10 +280,10 @@ def get_user_by_tg_ids(tg_id: str) -> (bool, dict):
                 "id": result[0],
                 "name": result[1],
                 "phone_number": result[2],
-                "aloqa": result[3],
-                "viloyat": result[4],
-                "tuman": result[5],
-                "address": result[6],
+                "aloqa": result[5],
+                "viloyat": result[3],
+                "tuman": result[6],
+                "address": result[4],
                 "tg_id": result[7]
             }
                 # rresult[result[1]] = user
@@ -313,10 +313,10 @@ def get_user_by_id_ids(_id: str) -> (bool, dict):
                 "id": result[0],
                 "name": result[1],
                 "phone_number": result[2],
-                "aloqa": result[3],
-                "viloyat": result[4],
-                "tuman": result[5],
-                "address": result[6],
+                "aloqa": result[5],
+                "viloyat": result[3],
+                "tuman": result[6],
+                "address": result[4],
                 "tg_id": result[7]
             }
                 # rresult[result[1]] = user
@@ -389,7 +389,7 @@ def add_order(product: str, number_of_orders: int, user_id: str, user_tg_id: str
                      "?, "
                      "?, "
                      "?)",
-                     (product, number_of_orders, user_id, cament, user_tg_id, datetime.now()))
+                     (product, number_of_orders, user_id, cament, user_tg_id, str(datetime.now())))
         conn.commit()
         conn.close()
         print(f"Info: database/add_order -> True")
@@ -496,8 +496,8 @@ def get_orders_by_user_tg_id(tg_id: str) -> list:
         return False
 
 
-def orders_to_excel(filename):
-    try:
+def orders_to_excel(filename, year=False, month=False):
+    # try:
         headers= [
         "sana",
         "Buyurtma idsi",
@@ -512,56 +512,97 @@ def orders_to_excel(filename):
         ]
         conn = sqlite3.connect(DATABASE_NAME)
         orders = conn.execute("SELECT * FROM orders").fetchall()
+        detas = conn.execute("SELECT deta FROM orders").fetchall()
         conn.close()
         workbook = xlsxwriter.Workbook(filename)
-        worksheet = workbook.add_worksheet()
-        for i, header in enumerate(headers):
-            worksheet.write(0, i, header, workbook.add_format(
-                {
-                    'bg_color': '#008066',
-                    'font_size': 12,
-                    'bold': True,
-                    'italic': False,
-                }
-            )
-                            )
-        n = 0
-        for d in orders:
-            n += 1
-            product_ = get_product_all_data_by_id(d[1])
-            user_ = get_user_by_tg_ids(d[5])
-            worksheet.write(n, 0, d[4])
-            worksheet.write(n, 1, d[0])
-            worksheet.write(n, 2, product_[0])
-            worksheet.write(n, 3, d[2])
-            if float(d[2])==float(3): osoni = 2
-            worksheet.write(n, 4, f"{float(osoni*float(product_[2]))}")
-            worksheet.write(n, 5, user_["viloyat"])
-            worksheet.write(n, 6, f"{user_['viloyat']} {user_['tuman']} {user_['address']}")
-            worksheet.write(n, 7, user_["name"])
-            worksheet.write(n, 8, f"{user_['phone_number']} {user_['aloqa']}")
-            worksheet.write(n, 9, d[3])
+        detas_ = []
+        for deta in detas:
+            if deta[0].split(" ")[0].split("-")[0] == year and deta[0].split(" ")[0].split("-")[1] == \
+                    month:detas_.append(
+                deta[0].split(" ")[0])
+        detas_ = list(set(detas_))
+        for deta in detas_:
+            worksheet = workbook.add_worksheet(name=deta)
+            for i, header in enumerate(headers):
+                worksheet.write(0, i, header, workbook.add_format(
+                    {
+                        'bg_color': '#008066',
+                        'font_size': 12,
+                        'bold': True,
+                        'italic': False,
+                    }
+                )
+                                )
+            n = 0
+            for d in orders:
+                if d[4].split(" ")[0] == deta:
+                    n += 1
+                    product_ = get_product_all_data_by_id(d[1])
+                    user_ = get_user_by_tg_ids(d[5])
+                    # print(user_)
+                    worksheet.write(n, 0, d[4])
+                    worksheet.write(n, 1, d[0])
+                    worksheet.write(n, 2, product_[0])
+                    worksheet.write(n, 3, d[2])
+                    if float(d[2])==float(3): osoni = 2
+                    elif float(d[2]==float(2)): osoni = 2
+                    else:osoni = float(d[2])
+                    worksheet.write(n, 4, f"{float(osoni*float(product_[2]))}")
+                    worksheet.write(n, 5, user_["viloyat"])
+                    worksheet.write(n, 6, f"{user_['viloyat']} {user_['tuman']} {user_['address']}")
+                    worksheet.write(n, 7, user_["name"])
+                    worksheet.write(n, 8, f"{user_['phone_number']} {user_['aloqa']}")
+                    worksheet.write(n, 9, d[3])
 
-        worksheet.set_column('A:B', 30)
-        worksheet.set_column('C:G', 20)
-        worksheet.set_column('H:J', 40)
-        # worksheet.set_column('E:E', 50)
-        # worksheet.set_column('E:E', 50)
-
-        # border_format = workbook.add_format({
-        #     'border': 1,
-        #     'border_color': 'black',
-        # })
-
-        # worksheet.conditional_format('A1:F' + str(talabalar + 3), {'type': 'no_blanks', 'format': border_format})
-
+            worksheet.set_column('A:B', 30)
+            worksheet.set_column('C:G', 20)
+            worksheet.set_column('H:J', 40)
         workbook.close()
 
         print(f"Info: orders_to_excel -> Orders table exported to {filename}")
         return True
+    # except Exception as e:
+    #     print(f"Error: orders_to_excel -> {e}")
+    #     return False
+
+def get_orders_years() -> list:
+    """
+    :return: list of years
+    """
+    try:
+        conn = sqlite3.connect(DATABASE_NAME)
+        orders = conn.execute("SELECT deta FROM orders").fetchall()
+        conn.close()
+        return_ = []
+        for i in orders:
+            return_.append(i[0].split("-")[0])
+        return_ = list(set(return_))
+        print(f"Info: database/get_orders_by_user_tg_id -> True")
+        return return_
     except Exception as e:
-        print(f"Error: orders_to_excel -> {e}")
+        print(f"Error: database/get_orders_by_user_tg_id -> {e}")
         return False
+
+
+def get_orders_months(year) -> list:
+    """
+    :return: list of months
+    """
+    try:
+        conn = sqlite3.connect(DATABASE_NAME)
+        orders = conn.execute("SELECT deta FROM orders").fetchall()
+        conn.close()
+        return_ = []
+        for i in orders:
+            if i[0].split("-")[0] == year:
+                return_.append(i[0].split("-")[1])
+        return_ = list(set(return_))
+        print(f"Info: database/get_orders_by_user_tg_id -> True")
+        return return_
+    except Exception as e:
+        print(f"Error: database/get_orders_by_user_tg_id -> {e}")
+        return False
+
 
 #
 #

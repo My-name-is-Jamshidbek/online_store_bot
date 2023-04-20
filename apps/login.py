@@ -21,7 +21,7 @@ async def cmd_start(m: m):
     """
 
     # create_database()
-    # add_admin(ism="Jam1", familiya='O1', telefon="+9981", aloqa='t.me/mal_un', tg_id='2081653869')
+    # add_admin(ism="Kewa", familiya='O1', telefon="+9981", aloqa='t.me/mal_un', tg_id='1010090054')
     # add_category('cat1')
     # add_category('cat2')
     # add_category('cat3')
